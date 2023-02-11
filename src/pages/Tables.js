@@ -1,377 +1,196 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { CDBTable, CDBTableHeader, CDBTableBody } from "cdbreact";
 import Sidebar from "../Sidebar";
 import Navbar from "../Navbar";
+import { CDBInput } from "cdbreact";
 
 export const Tables = () => {
+  const [cartList, setCartList] = useState([]);
+  const [searchInput, setSearchInput] = useState("");
+  const [availableUser, setAvailableUser] = useState([]);
+  let user_item = [];
+
+  const handleChange = (e) => {
+    e.preventDefault();
+    setSearchInput(e.target.value);
+
+    if (e.target.value.length > 0) {
+      setAvailableUser(
+        cartList.filter((cart) => {
+          return cart.username.match(e.target.value);
+        })
+      );
+    } else setAvailableUser(cartList);
+  };
+
+  const fetchCart = async () => {
+    let user_cart = [];
+    let result = await fetch(
+      "https://sp11-cart.000webhostapp.com/api/carts/read.php"
+    );
+    result = await result.json();
+    user_cart = [...user_cart, result.data];
+
+    result = await fetch(
+      `https://sp11-cart.000webhostapp.com/api/carts_details/count-products-by-uid.php`
+    );
+    result = await result.json();
+    let cart_item = [];
+    cart_item = [...cart_item, result.data];
+
+    let count = 0;
+    result = await fetch("https://api-admin-dype.onrender.com/api/login", {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: "admin@ltct.com",
+        password: "123456",
+      }),
+    });
+
+    result = await result.json();
+    let token = result.access_token;
+    result = await fetch("https://api-admin-dype.onrender.com/api/user", {
+      method: "get",
+      headers: {
+        "Content-type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+
+    result = await result.json();
+    let user_list = [];
+    user_list = result;
+
+    user_cart[0].forEach((cart) => {
+      for (let i = 0; i < cart_item[0].length; i++) {
+        if (cart.cart_id === cart_item[0][i].cart_id) {
+          user_item = [
+            ...user_item,
+            {
+              user_id: cart.user_id,
+              cart_id: cart.cart_id,
+              total_products: cart_item[0][i].total_products,
+            },
+          ];
+          count++;
+          break;
+        }
+      }
+      if (count === 0)
+        user_item = [
+          ...user_item,
+          { user_id: cart.user_id, cart_id: cart.cart_id, total_products: 0 },
+        ];
+      count = 0;
+    });
+
+    user_item.forEach((element, index) => {
+      for (let i = 0; i < user_list.length; i++) {
+        if (element.user_id === JSON.stringify(user_list[i].id)) {
+          user_item[index] = {
+            user_id: element.user_id,
+            cart_id: element.cart_id,
+            total_products: element.total_products,
+            username: user_list[i].name,
+            email: user_list[i].email,
+          };
+          count++;
+          break;
+        }
+      }
+      if (count === 0)
+        user_item[index] = {
+          user_id: element.user_id,
+          cart_id: element.cart_id,
+          total_products: element.total_products,
+          username: "default",
+          email: "default",
+        };
+      count = 0;
+    });
+    setCartList(user_item);
+    setAvailableUser(user_item);
+  };
+
+  useEffect(() => {
+    fetchCart();
+  }, []);
+
   return (
     <div className="d-flex">
       <div>
-        <Sidebar/>
+        <Sidebar />
       </div>
-      <div style={{flex:"1 1 auto", display:"flex", flexFlow:"column", height:"100vh", overflowY:"hidden"}}>
-        <Navbar/>
-        <div style={{height:"100%"}}>
-          <div style={{padding:"20px 5%",height:"calc(100% - 64px)",overflowY:"scroll"}}>
-            <div style={{display:"grid", gridTemplateColumns:"repeat(1, minmax(200px, 700px))"}}>
-              <div className="mt-5 w-100">
-                <h4 className="font-weight-bold mb-3">Default Table</h4>
-                <CDBTable responsive>
-                  <CDBTableHeader>
-                    <tr>
-                      <th>#</th>
-                      <th>First</th>
-                      <th>Last</th>
-                      <th>Handle</th>
-                    </tr>
-                  </CDBTableHeader>
-                  <CDBTableBody>
-                    <tr>
-                      <td>1</td>
-                      <td>Mark</td>
-                      <td>Otto</td>
-                      <td>@mdo</td>
-                    </tr>
-                    <tr>
-                      <td>2</td>
-                      <td>Jacob</td>
-                      <td>Thornton</td>
-                      <td>@fat</td>
-                    </tr>
-                    <tr>
-                      <td>3</td>
-                      <td>Larry</td>
-                      <td>the Bird</td>
-                      <td>@twitter</td>
-                    </tr>
-                  </CDBTableBody>
-                </CDBTable>
-              </div>
+      <div
+        style={{
+          flex: "1 1 auto",
+          display: "flex",
+          flexFlow: "column",
+          height: "100vh",
+          overflowY: "hidden",
+        }}
+      >
+        <Navbar />
+        <div style={{ height: "100%" }}>
+          <div
+            style={{
+              padding: "20px 5%",
+              height: "calc(100% - 64px)",
+              overflowY: "scroll",
+            }}
+          >
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(1, minmax(200px, 700px))",
+              }}
+            >
               <div className="mt-5">
-                <h4 className="font-weight-bold mb-3">Table Head Options</h4>
-                <h5>Dark Header</h5>
+                <h4 className="font-weight-bold mb-3">Giỏ hàng</h4>
+                <CDBInput
+                  type="search"
+                  size="md"
+                  hint="Tìm kiếm"
+                  className="mb-n4 mt-n3 input-nav"
+                  onChange={handleChange}
+                  value={searchInput}
+                />
                 <CDBTable responsive>
                   <CDBTableHeader color="dark">
                     <tr>
-                      <th>#</th>
-                      <th>First</th>
-                      <th>Last</th>
-                      <th>Handle</th>
+                      <th>ID</th>
+                      <th>Tên khách hàng</th>
+                      <th>Email</th>
+                      <th>Số sản phẩm trong giỏ hàng</th>
                     </tr>
                   </CDBTableHeader>
                   <CDBTableBody>
-                    <tr>
-                      <td>1</td>
-                      <td>Mark</td>
-                      <td>Otto</td>
-                      <td>@mdo</td>
-                    </tr>
-                    <tr>
-                      <td>2</td>
-                      <td>Jacob</td>
-                      <td>Thornton</td>
-                      <td>@fat</td>
-                    </tr>
-                    <tr>
-                      <td>3</td>
-                      <td>Larry</td>
-                      <td>the Bird</td>
-                      <td>@twitter</td>
-                    </tr>
-                  </CDBTableBody>
-                </CDBTable>
-                <h5 className="mt-4">Light Header</h5>
-                <CDBTable responsive>
-                  <CDBTableHeader color="light">
-                    <tr>
-                      <th>#</th>
-                      <th>First</th>
-                      <th>Last</th>
-                      <th>Handle</th>
-                    </tr>
-                  </CDBTableHeader>
-                  <CDBTableBody>
-                    <tr>
-                      <td>1</td>
-                      <td>Mark</td>
-                      <td>Otto</td>
-                      <td>@mdo</td>
-                    </tr>
-                    <tr>
-                      <td>2</td>
-                      <td>Jacob</td>
-                      <td>Thornton</td>
-                      <td>@fat</td>
-                    </tr>
-                    <tr>
-                      <td>3</td>
-                      <td>Larry</td>
-                      <td>the Bird</td>
-                      <td>@twitter</td>
-                    </tr>
-                  </CDBTableBody>
-                </CDBTable>
-              </div>
-              <div className="mt-5">
-                <h4 className="font-weight-bold mb-3">Striped Table</h4>
-                <CDBTable striped responsive>
-                  <CDBTableHeader>
-                    <tr>
-                      <th>#</th>
-                      <th>First</th>
-                      <th>Last</th>
-                      <th>Handle</th>
-                    </tr>
-                  </CDBTableHeader>
-                  <CDBTableBody>
-                    <tr>
-                      <td>1</td>
-                      <td>Mark</td>
-                      <td>Otto</td>
-                      <td>@mdo</td>
-                    </tr>
-                    <tr>
-                      <td>2</td>
-                      <td>Jacob</td>
-                      <td>Thornton</td>
-                      <td>@fat</td>
-                    </tr>
-                    <tr>
-                      <td>3</td>
-                      <td>Larry</td>
-                      <td>the Bird</td>
-                      <td>@twitter</td>
-                    </tr>
-                  </CDBTableBody>
-                </CDBTable>
-              </div>
-              <div className="mt-5">
-                <h4 className="font-weight-bold mb-3">Bordered Table</h4>
-                <CDBTable bordered responsive>
-                    <CDBTableHeader>
+                    {cartList.length > 0 ? (
+                      availableUser.map((cart) => (
+                        <tr className="user-info">
+                          <td>{cart.user_id}</td>
+                          <td>{cart.username}</td>
+                          <td>{cart.email}</td>
+                          <td>{cart.total_products}</td>
+                        </tr>
+                      ))
+                    ) : (
                       <tr>
-                        <th>#</th>
-                        <th>First</th>
-                        <th>Last</th>
-                        <th>Handle</th>
+                        <td>Loading...</td>
+                        <td>Loading...</td>
+                        <td>Loading...</td>
+                        <td>Loading...</td>
                       </tr>
-                    </CDBTableHeader>
-                    <CDBTableBody>
-                      <tr>
-                        <td>1</td>
-                        <td>Mark</td>
-                        <td>Otto</td>
-                        <td>@mdo</td>
-                      </tr>
-                      <tr>
-                        <td>2</td>
-                        <td>Jacob</td>
-                        <td>Thornton</td>
-                        <td>@fat</td>
-                      </tr>
-                      <tr>
-                        <td>3</td>
-                        <td>Larry</td>
-                        <td>the Bird</td>
-                        <td>@twitter</td>
-                      </tr>
-                    </CDBTableBody>
-                </CDBTable>
-              </div>
-              <div className="mt-5">
-                <h4 className="font-weight-bold mb-3">Borderless Table</h4>
-                <CDBTable borderless responsive>
-                  <CDBTableHeader>
-                    <tr>
-                      <th>#</th>
-                      <th>First</th>
-                      <th>Last</th>
-                      <th>Handle</th>
-                    </tr>
-                  </CDBTableHeader>
-                  <CDBTableBody>
-                    <tr>
-                      <td>1</td>
-                      <td>Mark</td>
-                      <td>Otto</td>
-                      <td>@mdo</td>
-                    </tr>
-                    <tr>
-                      <td>2</td>
-                      <td>Jacob</td>
-                      <td>Thornton</td>
-                      <td>@fat</td>
-                    </tr>
-                    <tr>
-                      <td>3</td>
-                      <td>Larry</td>
-                      <td>the Bird</td>
-                      <td>@twitter</td>
-                    </tr>
-                  </CDBTableBody>
-                </CDBTable>
-              </div>
-              <div className="mt-5">
-                <h4 className="font-weight-bold mb-3">Hoverable Rows</h4>
-                <CDBTable hover responsive>
-                  <CDBTableHeader>
-                    <tr>
-                      <th>#</th>
-                      <th>First</th>
-                      <th>Last</th>
-                      <th>Handle</th>
-                    </tr>
-                  </CDBTableHeader>
-                  <CDBTableBody>
-                    <tr>
-                      <td>1</td>
-                      <td>Mark</td>
-                      <td>Otto</td>
-                      <td>@mdo</td>
-                    </tr>
-                    <tr>
-                      <td>2</td>
-                      <td>Jacob</td>
-                      <td>Thornton</td>
-                      <td>@fat</td>
-                    </tr>
-                    <tr>
-                      <td>3</td>
-                      <td>Larry</td>
-                      <td>the Bird</td>
-                      <td>@twitter</td>
-                    </tr>
-                  </CDBTableBody>
-                </CDBTable>
-              </div>
-              <div className="mt-5">
-                <h4 className="font-weight-bold mb-3">Small Table</h4>
-                <CDBTable small responsive>
-                  <CDBTableHeader>
-                    <tr>
-                      <th>#</th>
-                      <th>First</th>
-                      <th>Last</th>
-                      <th>Handle</th>
-                    </tr>
-                  </CDBTableHeader>
-                  <CDBTableBody>
-                    <tr>
-                      <td>1</td>
-                      <td>Mark</td>
-                      <td>Otto</td>
-                      <td>@mdo</td>
-                    </tr>
-                    <tr>
-                      <td>2</td>
-                      <td>Jacob</td>
-                      <td>Thornton</td>
-                      <td>@fat</td>
-                    </tr>
-                    <tr>
-                      <td>3</td>
-                      <td>Larry</td>
-                      <td>the Bird</td>
-                      <td>@twitter</td>
-                    </tr>
-                  </CDBTableBody>
-                </CDBTable>
-              </div>
-              <div className="mt-5">
-                <h4 className="font-weight-bold mb-3">Captions</h4>
-                <CDBTable responsive>
-                  <caption>List of users</caption>
-                  <CDBTableHeader>
-                    <tr>
-                      <th>#</th>
-                      <th>First</th>
-                      <th>Last</th>
-                      <th>Handle</th>
-                    </tr>
-                  </CDBTableHeader>
-                  <CDBTableBody>
-                    <tr>
-                      <td>1</td>
-                      <td>Mark</td>
-                      <td>Otto</td>
-                      <td>@mdo</td>
-                    </tr>
-                    <tr>
-                      <td>2</td>
-                      <td>Jacob</td>
-                      <td>Thornton</td>
-                      <td>@fat</td>
-                    </tr>
-                    <tr>
-                      <td>3</td>
-                      <td>Larry</td>
-                      <td>the Bird</td>
-                      <td>@twitter</td>
-                    </tr>
-                  </CDBTableBody>
-                </CDBTable>
-              </div>
-              <div className="mt-5">
-                <h4 className="font-weight-bold mb-3">Responsive Table</h4>
-                <CDBTable responsive>
-                  <CDBTableHeader>
-                    <tr>
-                      <th>#</th>
-                      <th>First</th>
-                      <th>Second</th>
-                      <th>Third</th>
-                      <th>Fourth</th>
-                      <th>Fifth</th>
-                      <th>Sixth</th>
-                      <th>Seventh</th>
-                      <th>Last</th>
-                      <th>Handle</th>
-                    </tr>
-                  </CDBTableHeader>
-                  <CDBTableBody>
-                    <tr>
-                      <td>1</td>
-                      <td>Name</td>
-                      <td>Name</td>
-                      <td>Name</td>
-                      <td>Name</td>
-                      <td>Name</td>
-                      <td>Name</td>
-                      <td>Name</td>
-                      <td>Name</td>
-                      <td>@email</td>
-                    </tr>
-                    <tr>
-                      <td>2</td>
-                      <td>Name</td>
-                      <td>Name</td>
-                      <td>Name</td>
-                      <td>Name</td>
-                      <td>Name</td>
-                      <td>Name</td>
-                      <td>Name</td>
-                      <td>Name</td>
-                      <td>@email</td>
-                    </tr>
-                    <tr>
-                      <td>3</td>
-                      <td>Name</td>
-                      <td>Name</td>
-                      <td>Name</td>
-                      <td>Name</td>
-                      <td>Name</td>
-                      <td>Name</td>
-                      <td>Name</td>
-                      <td>Name</td>
-                      <td>@email</td>
-                    </tr>
+                    )}
                   </CDBTableBody>
                 </CDBTable>
               </div>
             </div>
-            <footer className="mx-auto my-3 text-center">
-                <small>&copy; Devwares, 2020. All rights reserved.</small>
-            </footer>
           </div>
         </div>
       </div>
