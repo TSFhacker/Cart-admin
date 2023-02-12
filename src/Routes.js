@@ -6,14 +6,13 @@ import { Hero404 } from "./pages/Hero404";
 import { Profile } from "./pages/Profile";
 
 const Routes = () => {
-
   return (
     <Fragment>
       <BrowserRouter>
-        <Route exact path="/" render={() => <Dashboard/> } />
-        <Route path="/tables" component={Tables} />
-        <Route path="/hero404" component={Hero404} />
-        <Route path="/profile" component={Profile} />
+        <Route exact path="/Cart-admin/" render={() => <Dashboard />} />
+        <Route path="/Cart-admin/tables" component={Tables} />
+        <Route path="Cart-admin/hero404" component={Hero404} />
+        <Route path="Cart-admin/profile" component={Profile} />
       </BrowserRouter>
     </Fragment>
   );

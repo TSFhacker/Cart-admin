@@ -1,91 +1,69 @@
 import React from "react";
-import { 
+import {
   CDBSidebar,
   CDBSidebarContent,
   CDBSidebarFooter,
   CDBSidebarHeader,
   CDBSidebarMenu,
-  CDBSidebarMenuItem } from "cdbreact";
+  CDBSidebarMenuItem,
+} from "cdbreact";
 import { NavLink } from "react-router-dom";
 
 const Sidebar = () => {
-
   return (
     <div
       className={`app`}
-      style={{ display: "flex", height: "100%", overflow:"scroll initial"}}
+      style={{ display: "flex", height: "100%", overflow: "scroll initial" }}
     >
-      <CDBSidebar
-        textColor="#fff"
-        backgroundColor="#333"
-      >
-        <CDBSidebarHeader
-          prefix={
-            <i className="fa fa-bars fa-large"></i>
-          }
-        >
-          <a href="/" className="text-decoration-none" style={{color:"inherit"}}>
+      <CDBSidebar textColor="#fff" backgroundColor="#333">
+        <CDBSidebarHeader prefix={<i className="fa fa-bars fa-large"></i>}>
+          <a
+            href="/"
+            className="text-decoration-none"
+            style={{ color: "inherit" }}
+          >
             Contrast
           </a>
         </CDBSidebarHeader>
 
         <CDBSidebarContent className="sidebar-content">
           <CDBSidebarMenu>
-            <NavLink
-              exact
-              to="/"
-              activeClassName="activeClicked"
-            >
-              <CDBSidebarMenuItem
-                icon="columns"
-              >
-                dashboard
-              </CDBSidebarMenuItem>
+            <NavLink exact to="/Cart-admin/" activeClassName="activeClicked">
+              <CDBSidebarMenuItem icon="columns">dashboard</CDBSidebarMenuItem>
             </NavLink>
             <NavLink
               exact
-              to="/tables"
+              to="/Cart-admin/tables"
               activeClassName="activeClicked"
             >
-              <CDBSidebarMenuItem
-                icon="table"
-              >
-                tables
-              </CDBSidebarMenuItem>
+              <CDBSidebarMenuItem icon="table">tables</CDBSidebarMenuItem>
             </NavLink>
             <NavLink
               exact
-              to="/profile"
+              to="/Cart-admin/profile"
               activeClassName="activeClicked"
             >
-              <CDBSidebarMenuItem
-                icon="user"
-              >
-                profile
-              </CDBSidebarMenuItem>
+              <CDBSidebarMenuItem icon="user">profile</CDBSidebarMenuItem>
             </NavLink>
             <NavLink
               exact
-              to="/hero404"
+              to="/Cart-admin/hero404"
               target="_blank"
               activeClassName="activeClicked"
             >
-              <CDBSidebarMenuItem
-                icon="exclamation-circle"
-              >
+              <CDBSidebarMenuItem icon="exclamation-circle">
                 404 page
               </CDBSidebarMenuItem>
             </NavLink>
           </CDBSidebarMenu>
-          <CDBSidebarMenu>
-          </CDBSidebarMenu>
+          <CDBSidebarMenu></CDBSidebarMenu>
         </CDBSidebarContent>
 
         <CDBSidebarFooter style={{ textAlign: "center" }}>
           <div
             className="sidebar-btn-wrapper"
             style={{
-              padding: "20px 5px"
+              padding: "20px 5px",
             }}
           >
             Sidebar Footer
@@ -94,6 +72,6 @@ const Sidebar = () => {
       </CDBSidebar>
     </div>
   );
-}
+};
 
 export default Sidebar;
