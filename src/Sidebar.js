@@ -36,24 +36,7 @@ const Sidebar = () => {
               to="/Cart-admin/tables"
               activeClassName="activeClicked"
             >
-              <CDBSidebarMenuItem icon="table">tables</CDBSidebarMenuItem>
-            </NavLink>
-            <NavLink
-              exact
-              to="/Cart-admin/profile"
-              activeClassName="activeClicked"
-            >
-              <CDBSidebarMenuItem icon="user">profile</CDBSidebarMenuItem>
-            </NavLink>
-            <NavLink
-              exact
-              to="/Cart-admin/hero404"
-              target="_blank"
-              activeClassName="activeClicked"
-            >
-              <CDBSidebarMenuItem icon="exclamation-circle">
-                404 page
-              </CDBSidebarMenuItem>
+              <CDBSidebarMenuItem icon="table">table</CDBSidebarMenuItem>
             </NavLink>
           </CDBSidebarMenu>
           <CDBSidebarMenu></CDBSidebarMenu>
